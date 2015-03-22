@@ -115,6 +115,7 @@ define Build/Configure/Default
 		$(call replace_script,$(PKG_BUILD_DIR)/$(3),config.sub) \
 		$(CONFIGURE_VARS) \
 		$(2) \
+		$(INVOKE) \
 		$(CONFIGURE_CMD) \
 		$(CONFIGURE_ARGS) \
 		$(1); \
@@ -140,14 +141,14 @@ MAKE_PATH = .
 
 define Build/Compile/Default
 	+$(MAKE_VARS) \
-	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)/$(MAKE_PATH) \
+	$(INVOKE) $(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)/$(MAKE_PATH) \
 		$(MAKE_FLAGS) \
 		$(1);
 endef
 
 define Build/Install/Default
 	$(MAKE_VARS) \
-	$(MAKE) -C $(PKG_BUILD_DIR)/$(MAKE_PATH) \
+	$(INVOKE) $(MAKE) -C $(PKG_BUILD_DIR)/$(MAKE_PATH) \
 		$(MAKE_INSTALL_FLAGS) \
 		$(if $(1), $(1), install);
 endef
