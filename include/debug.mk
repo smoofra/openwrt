@@ -13,6 +13,12 @@
 # r: show autorebuild messages
 # v: verbose (no .SILENCE for common targets)
 
+ifneq ($(DEBUG_SHELL),)
+  INVOKE:=$(TOPDIR)/scripts/invoke.py
+else
+  INVOKE:=
+endif
+
 ifeq ($(DUMP),)
   ifeq ($(DEBUG),all)
     build_debug:=dltvr
