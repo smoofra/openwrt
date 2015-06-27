@@ -127,6 +127,23 @@ config KERNEL_EARLY_PRINTK
 	  debugging purposes to send messages over the serial console in early boot.
 	  Enable this to debug early boot problems.
 
+config KERNEL_KPROBES
+	bool "Compile the kernel with kprobes support"
+	default n
+	select KERNEL_FTRACE
+	select KERNEL_PERF_EVENTS
+	help
+	  Compiles the kernel with KPROBES support, which allows you to trap
+	  at almost any kernel address and execute a callback function.
+	  register_kprobe() establishes a probepoint and specifies the
+	  callback. Kprobes is useful for kernel debugging, non-intrusive
+	  instrumentation and testing.
+	  If in doubt, say "N".
+
+config KERNEL_KPROBE_EVENT
+	bool
+	default y if KERNEL_KPROBES
+
 config KERNEL_AIO
 	bool "Compile the kernel with asynchronous IO support"
 	default n
@@ -283,7 +300,7 @@ if KERNEL_CGROUPS
 	config KERNEL_MEMCG
 		bool "Memory Resource Controller for Control Groups"
 		default n
-		depends on KERNEL_RESOURCE_COUNTERS
+		depends on KERNEL_RESOURCE_COUNTERS || !LINUX_3_18
 		help
 		  Provides a memory resource controller that manages both anonymous
 		  memory and page cache. (See Documentation/cgroups/memory.txt)

@@ -64,7 +64,7 @@ endef
 define Package/comgt/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/comgt $(1)/usr/bin/
-	ln -s comgt $(1)/usr/bin/gcom
+	$(LN) comgt $(1)/usr/bin/gcom
 	$(INSTALL_DIR) $(1)/etc/chatscripts
 	$(INSTALL_DATA) ./files/3g.chat $(1)/etc/chatscripts/3g.chat
 	$(INSTALL_DATA) ./files/evdo.chat $(1)/etc/chatscripts/evdo.chat
@@ -80,7 +80,6 @@ define Package/comgt/install
 	$(INSTALL_DATA) ./files/3g.usb $(1)/etc/hotplug.d/tty/30-3g
 	$(INSTALL_DIR) $(1)/lib/netifd/proto
 	$(INSTALL_BIN) ./files/3g.sh $(1)/lib/netifd/proto/3g.sh
-	$(INSTALL_BIN) ./files/directip.sh $(1)/lib/netifd/proto/directip.sh
 endef
 
 define Package/comgt-directip/install

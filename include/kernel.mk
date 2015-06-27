@@ -97,7 +97,7 @@ define ModuleAutoLoad
 				mkdir -p $(2)/etc/modules-boot.d; \
 				ln -s ../modules.d/$(1) $(2)/etc/modules-boot.d/; \
 			fi; \
-			modules="$$$$$$$${modules:+$$$$$$$$modules}"; \
+			modules="$$$$$$$${modules:+$$$$$$$$modules }$$$$$$$$mods"; \
 		fi; \
 	}; \
 	add_module() { \
@@ -121,11 +121,11 @@ define ModuleAutoLoad
 	if [ -n "$$$$$$$$modules" ]; then \
 		mkdir -p $(2)/etc/modules.d; \
 		mkdir -p $(2)/CONTROL; \
-		echo "#!/bin/sh" > $(2)/CONTROL/postinst; \
-		echo "[ -z \"\$$$$$$$$IPKG_INSTROOT\" ] || exit 0" >> $(2)/CONTROL/postinst; \
-		echo ". /lib/functions.sh" >> $(2)/CONTROL/postinst; \
-		echo "insert_modules $$$$$$$$modules" >> $(2)/CONTROL/postinst; \
-		chmod 0755 $(2)/CONTROL/postinst; \
+		echo "#!/bin/sh" > $(2)/CONTROL/postinst-pkg; \
+		echo "[ -z \"\$$$$$$$$IPKG_INSTROOT\" ] || exit 0" >> $(2)/CONTROL/postinst-pkg; \
+		echo ". /lib/functions.sh" >> $(2)/CONTROL/postinst-pkg; \
+		echo "insert_modules $$$$$$$$modules" >> $(2)/CONTROL/postinst-pkg; \
+		chmod 0755 $(2)/CONTROL/postinst-pkg; \
 	fi
 endef
 
@@ -156,6 +156,12 @@ define KernelPackage
     $(call KernelPackage/$(1))
     $(call KernelPackage/$(1)/$(BOARD))
   endef
+
+  ifdef KernelPackage/$(1)/conffiles
+    define Package/kmod-$(1)/conffiles
+$(call KernelPackage/$(1)/conffiles)
+    endef
+  endif
 
   ifdef KernelPackage/$(1)/description
     define Package/kmod-$(1)/description

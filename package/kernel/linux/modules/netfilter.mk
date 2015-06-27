@@ -171,7 +171,6 @@ endef
 define KernelPackage/ipt-filter/description
  Netfilter (IPv4) kernel modules for packet content inspection
  Includes:
- - layer7
  - string
 endef
 
@@ -229,11 +228,11 @@ IPSET_MODULES:= \
 	ipset/ip_set_bitmap_ipmac \
 	ipset/ip_set_bitmap_port \
 	ipset/ip_set_hash_ip \
-	ipset/ip_set_hash_ipmark@ge3.18 \
+	ipset/ip_set_hash_ipmark \
 	ipset/ip_set_hash_ipport \
 	ipset/ip_set_hash_ipportip \
 	ipset/ip_set_hash_ipportnet \
-	ipset/ip_set_hash_mac@ge3.18 \
+	ipset/ip_set_hash_mac \
 	ipset/ip_set_hash_netportnet \
 	ipset/ip_set_hash_net \
 	ipset/ip_set_hash_netnet \
@@ -461,7 +460,6 @@ define KernelPackage/ipt-tproxy
   	CONFIG_NETFILTER_XT_MATCH_SOCKET \
   	CONFIG_NETFILTER_XT_TARGET_TPROXY
   FILES:= \
-	$(if $(call kernel_patchver_lt,3.12),$(LINUX_DIR)/net/netfilter/nf_tproxy_core.ko) \
   	$(foreach mod,$(IPT_TPROXY-m),$(LINUX_DIR)/net/$(mod).ko)
   AUTOLOAD:=$(call AutoProbe,$(notdir nf_tproxy_core $(IPT_TPROXY-m)))
   $(call AddDepends/ipt)

@@ -63,7 +63,7 @@ define KernelPackage/ata-ahci-platform
     $(LINUX_DIR)/drivers/ata/ahci_platform.ko \
     $(LINUX_DIR)/drivers/ata/libahci_platform.ko
   AUTOLOAD:=$(call AutoLoad,40,libahci_platform ahci_platform,1)
-  $(call AddDepends/ata,@TARGET_ipq806x +kmod-ata-ahci)
+  $(call AddDepends/ata,@TARGET_ipq806x||TARGET_mvebu +kmod-ata-ahci)
 endef
 
 define KernelPackage/ata-ahci-platform/description
@@ -120,6 +120,22 @@ define KernelPackage/ata-marvell-sata/description
 endef
 
 $(eval $(call KernelPackage,ata-marvell-sata))
+
+
+define KernelPackage/ata-mvebu-ahci
+  TITLE:=Marvell EBU AHCI support
+  DEPENDS:=@TARGET_mvebu +kmod-ata-ahci-platform
+  KCONFIG:=CONFIG_AHCI_MVEBU
+  FILES:=$(LINUX_DIR)/drivers/ata/ahci_mvebu.ko
+  AUTOLOAD:=$(call AutoLoad,41,ahci_mvebu,1)
+  $(call AddDepends/ata)
+endef
+
+define KernelPackage/ata-mvebu-ahci/description
+ AHCI support for Marvell EBU SoCs
+endef
+
+$(eval $(call KernelPackage,ata-mvebu-ahci))
 
 
 define KernelPackage/ata-nvidia-sata
@@ -251,6 +267,8 @@ define KernelPackage/dm
 	CONFIG_DM_DEBUG=n \
 	CONFIG_DM_UEVENT=n \
 	CONFIG_DM_DELAY=n \
+	CONFIG_DM_LOG_WRITES=n \
+	CONFIG_DM_MQ_DEFAULT=n \
 	CONFIG_DM_MULTIPATH=n \
 	CONFIG_DM_ZERO=n \
 	CONFIG_DM_SNAPSHOT=n \

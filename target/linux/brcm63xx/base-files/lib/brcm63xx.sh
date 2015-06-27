@@ -39,6 +39,9 @@ brcm63xx_dt_detect() {
 	"Broadcom BCM963268BU_P300 reference board")
 		board_name="bcm963268bu_p300"
 		;;
+	"Broadcom BCM963269BHR reference board")
+		board_name="bcm963269bhr"
+		;;
 	"Broadcom bcm963281TAN reference board")
 		board_name="bcm963281tan"
 		;;
@@ -152,6 +155,9 @@ brcm63xx_dt_detect() {
 		;;
 	"Huawei EchoLife HG556a (version C)")
 		board_name="hg556a_c"
+		;;
+	"Huawei HG655b")
+		board_name="hg655b"
 		;;
 	"Inteno VG50")
 		board_name="vg50"
