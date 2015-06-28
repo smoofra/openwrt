@@ -193,7 +193,7 @@ export PKG_CONFIG
 
 HOSTCC:=gcc
 HOSTCXX:=g++
-HOST_CPPFLAGS:=-I$(STAGING_DIR_HOST)/include -I$(STAGING_DIR_HOST)/usr/include  -I/usr/local/opt/openssl/include
+HOST_CPPFLAGS:=-I$(STAGING_DIR_HOST)/include -I$(STAGING_DIR_HOST)/usr/include  -I/usr/local/opt/openssl/include -I/usr/local/include
 HOST_CFLAGS:=-O2 $(HOST_CPPFLAGS)
 HOST_LDFLAGS:=-L$(STAGING_DIR_HOST)/lib -L$(STAGING_DIR_HOST)/usr/lib -L/usr/local/opt/openssl/lib
 
