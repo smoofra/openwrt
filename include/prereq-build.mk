@@ -107,11 +107,16 @@ $(eval $(call SetupHostCommand,grep,Please install GNU 'grep', \
 	ggrep --version 2>&1 | grep GNU, \
 	grep --version 2>&1 | grep GNU))
 
+ifeq ($(HOST_OS),Darwin)
+    HOMEBREW_GETOPT:= /usr/local/opt/gnu-getopt/bin/getopt -o t --long test -- --test | grep '^ *--test *--'
+endif
+
 $(eval $(call SetupHostCommand,getopt, \
 	Please install an extended getopt version that supports --long, \
 	gnugetopt -o t --long test -- --test | grep '^ *--test *--', \
 	/usr/local/bin/getopt -o t --long test -- --test | grep '^ *--test *--', \
-	getopt -o t --long test -- --test | grep '^ *--test *--'))
+	getopt -o t --long test -- --test | grep '^ *--test *--', \
+	$(HOMEBREW_GETOPT)))
 
 $(eval $(call SetupHostCommand,stat,Cannot find a file stat utility, \
 	gnustat -c%s $(TMP_DIR)/.host.mk, \

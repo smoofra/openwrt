@@ -198,8 +198,14 @@ export PKG_CONFIG
 HOSTCC:=gcc
 HOSTCXX:=g++
 HOST_CPPFLAGS:=-I$(STAGING_DIR_HOST)/include -I$(STAGING_DIR_HOST)/usr/include
-HOST_CFLAGS:=-O2 $(HOST_CPPFLAGS)
 HOST_LDFLAGS:=-L$(STAGING_DIR_HOST)/lib -L$(STAGING_DIR_HOST)/usr/lib
+ifeq ($(shell uname),Darwin)
+    # add Homebrew to our flags
+    HOST_CPPFLAGS+= -I/usr/local/include -I/usr/local/opt/openssl/include
+    HOST_LDFLAGS+= -L/usr/local/lib -L/usr/local/opt/openssl/lib
+endif
+HOST_CFLAGS:=-O2 $(HOST_CPPFLAGS)
+
 
 ifeq ($(CONFIG_GCC_VERSION_4_4)$(CONFIG_GCC_VERSION_4_6)$(CONFIG_EXTERNAL_TOOLCHAIN),)
   TARGET_AR:=$(TARGET_CROSS)gcc-ar
