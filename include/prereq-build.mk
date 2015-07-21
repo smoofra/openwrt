@@ -26,49 +26,39 @@ $(eval $(call TestHostCommand,case-sensitive-fs, \
 
 $(eval $(call SetupHostCommand,gcc, \
 	Please install the GNU C Compiler (gcc), \
-	$(CC) --version | grep gcc, \
-	gcc --version | grep gcc, \
-	gcc49 --version | grep gcc, \
-	gcc48 --version | grep gcc, \
-	gcc47 --version | grep gcc, \
-	gcc46 --version | grep gcc, \
-	gcc --version | grep Apple.LLVM ))
+	$(HOSTCC) --version | grep gcc, \
+	$(HOSTCC) --version | grep Apple.LLVM ))
 
 $(eval $(call TestHostCommand,working-gcc, \
 	Please reinstall the GNU C Compiler - it appears to be broken, \
 	echo 'int main(int argc, char **argv) { return 0; }' | \
-		gcc -x c -o $(TMP_DIR)/a.out -))
+		$(HOSTCC) $(HOST_CFLAGS) $(HOST_LDFLAGS) -x c -o $(TMP_DIR)/a.out -))
 
 $(eval $(call SetupHostCommand,g++, \
 	Please install the GNU C++ Compiler (g++), \
-	$(CXX) --version | grep g++, \
-	g++ --version | grep g++, \
-	g++49 --version | grep g++, \
-	g++48 --version | grep g++, \
-	g++47 --version | grep g++, \
-	g++46 --version | grep g++, \
-	g++ --version | grep Apple.LLVM ))
+	$(HOSTCXX) --version | grep g++, \
+	$(HOSTCXX) --version | grep Apple.LLVM ))
 
 $(eval $(call TestHostCommand,working-g++, \
 	Please reinstall the GNU C++ Compiler - it appears to be broken, \
 	echo 'int main(int argc, char **argv) { return 0; }' | \
-		g++ -x c++ -o $(TMP_DIR)/a.out - -lstdc++ && \
+		$(HOSTCXX) $(HOST_CFLAGS) $(HOST_LDFLAGS) -x c++ -o $(TMP_DIR)/a.out - -lstdc++ && \
 		$(TMP_DIR)/a.out))
 
 $(eval $(call TestHostCommand,ncurses, \
 	Please install ncurses. (Missing libncurses.so or ncurses.h), \
 	echo 'int main(int argc, char **argv) { initscr(); return 0; }' | \
-		gcc -include ncurses.h -x c -o $(TMP_DIR)/a.out - -lncurses))
+		$(HOSTCC) $(HOST_CFLAGS) $(HOST_LDFLAGS) -include ncurses.h -x c -o $(TMP_DIR)/a.out - -lncurses))
 
 $(eval $(call TestHostCommand,zlib, \
 	Please install zlib. (Missing libz.so or zlib.h), \
 	echo 'int main(int argc, char **argv) { gzdopen(0, "rb"); return 0; }' | \
-		gcc -include zlib.h -x c -o $(TMP_DIR)/a.out - -lz))
+		$(HOSTCC) $(HOST_CFLAGS) $(HOST_LDFLAGS) -include zlib.h -x c -o $(TMP_DIR)/a.out - -lz))
 
 $(eval $(call TestHostCommand,libssl, \
 	Please install the openssl library (with development headers), \
 	echo 'int main(int argc, char **argv) { SSL_library_init(); return 0; }' | \
-		gcc -include openssl/ssl.h -x c -o $(TMP_DIR)/a.out - -lcrypto -lssl))
+		$(HOSTCC) $(HOST_CFLAGS) $(HOST_LDFLAGS) -include openssl/ssl.h -x c -o $(TMP_DIR)/a.out - -lcrypto -lssl))
 
 
 $(eval $(call SetupHostCommand,tar,Please install GNU 'tar', \
@@ -107,11 +97,16 @@ $(eval $(call SetupHostCommand,grep,Please install GNU 'grep', \
 	ggrep --version 2>&1 | grep GNU, \
 	grep --version 2>&1 | grep GNU))
 
+ifeq ($(HOST_OS),Darwin)
+    HOMEBREW_GETOPT:= /usr/local/opt/gnu-getopt/bin/getopt -o t --long test -- --test | grep '^ *--test *--'
+endif
+
 $(eval $(call SetupHostCommand,getopt, \
 	Please install an extended getopt version that supports --long, \
 	gnugetopt -o t --long test -- --test | grep '^ *--test *--', \
 	/usr/local/bin/getopt -o t --long test -- --test | grep '^ *--test *--', \
-	getopt -o t --long test -- --test | grep '^ *--test *--'))
+	getopt -o t --long test -- --test | grep '^ *--test *--', \
+	$(HOMEBREW_GETOPT)))
 
 $(eval $(call SetupHostCommand,stat,Cannot find a file stat utility, \
 	gnustat -c%s $(TMP_DIR)/.host.mk, \
@@ -153,6 +148,13 @@ $(eval $(call SetupHostCommand,file,Please install the 'file' package, \
 $(eval $(call SetupHostCommand,openssl,Please install the 'openssl' utility, \
 	openssl version | grep OpenSSL))
 
+$(eval $(call SetupHostCommand,date,Please install GNU 'date', \
+	date --help, \
+	gdate --help))
+
+$(eval $(call SetupHostCommand,dd,Please install GNU 'dd', \
+	dd --help, \
+	gdd --help))
 
 # Install ldconfig stub
 $(eval $(call TestHostCommand,ldconfig-stub,Failed to install stub, \
