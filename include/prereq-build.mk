@@ -148,6 +148,13 @@ $(eval $(call SetupHostCommand,file,Please install the 'file' package, \
 $(eval $(call SetupHostCommand,openssl,Please install the 'openssl' utility, \
 	openssl version | grep OpenSSL))
 
+$(eval $(call SetupHostCommand,date,Please install GNU 'date', \
+	date --help, \
+	gdate --help))
+
+$(eval $(call SetupHostCommand,dd,Please install GNU 'dd', \
+	dd --help, \
+	gdd --help))
 
 # Install ldconfig stub
 $(eval $(call TestHostCommand,ldconfig-stub,Failed to install stub, \
