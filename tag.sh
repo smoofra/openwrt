@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dest=$HOME/Desktop/loki-flash-$(gdate -I)
+dest=$HOME/Desktop/zuul-flash-$(gdate -I)
 
 set -e
 
@@ -11,7 +11,7 @@ fi
 
 mkdir "$dest"
 
-cp ./bin/mvebu/openwrt-mvebu-armada-xp-linksys-mamba-squashfs-* "$dest"
+cp ./bin/ar71xx/openwrt-ar71xx-generic-wndr3700-squashfs* "$dest"
 
 for d in . feeds/*; do
     if [ -e $d/.git ]; then
