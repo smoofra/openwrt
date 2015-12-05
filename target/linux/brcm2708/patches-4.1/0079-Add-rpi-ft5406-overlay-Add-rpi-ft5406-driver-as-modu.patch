@@ -1,7 +1,7 @@
-From dd888666ae9c4f80521f3bbe48edb86b423bb6f6 Mon Sep 17 00:00:00 2001
+From 4cfd7572f78d82a3e30c213f142ecc0d7f7cde7d Mon Sep 17 00:00:00 2001
 From: Gordon Hollingworth <gordon@fiveninjas.com>
 Date: Mon, 22 Jun 2015 16:27:07 +0100
-Subject: [PATCH 079/121] Add rpi-ft5406 overlay Add rpi-ft5406 driver as
+Subject: [PATCH 079/203] Add rpi-ft5406 overlay Add rpi-ft5406 driver as
  module
 
 ---

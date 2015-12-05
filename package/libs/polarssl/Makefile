@@ -1,4 +1,4 @@
-# 
+#
 # Copyright (C) 2011-2015 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
@@ -7,14 +7,17 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=mbedtls
-PKG_VERSION:=1.3.11
-PKG_RELEASE:=2
+PKG_NAME:=polarssl
+SRC_PKG_NAME:=mbedtls
+PKG_VERSION:=1.3.15
+PKG_RELEASE:=1
 PKG_USE_MIPS16:=0
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-gpl.tgz
+PKG_SOURCE:=$(SRC_PKG_NAME)-$(PKG_VERSION)-gpl.tgz
 PKG_SOURCE_URL:=https://polarssl.org/download/
-PKG_MD5SUM:=c02ce2e54862d678604794ee484fb59e
+PKG_MD5SUM:=59662a9daaf0cfe96c349bd5ad246d1b
+
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(SRC_PKG_NAME)-$(PKG_VERSION)
 
 PKG_BUILD_PARALLEL:=1
 PKG_LICENSE:=GPL-2.0+

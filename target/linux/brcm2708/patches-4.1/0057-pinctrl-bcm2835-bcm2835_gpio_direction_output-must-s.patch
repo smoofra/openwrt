@@ -1,7 +1,7 @@
-From 0bb455e4eca847aa74560f58bfd7daa13e9fb496 Mon Sep 17 00:00:00 2001
+From 8eed7ff146c26b290b51011f72b5262909dcd878 Mon Sep 17 00:00:00 2001
 From: Phil Elwell <phil@raspberrypi.org>
 Date: Wed, 4 Feb 2015 10:02:24 +0000
-Subject: [PATCH 057/121] pinctrl-bcm2835: bcm2835_gpio_direction_output must
+Subject: [PATCH 057/203] pinctrl-bcm2835: bcm2835_gpio_direction_output must
  set the value
 
 ---

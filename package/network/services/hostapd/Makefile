@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd
 PKG_VERSION:=2015-03-25
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 PKG_REV:=8278138e679174b1ec8af7f169c2810a8888e202
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
@@ -71,7 +71,7 @@ DRIVER_MAKEOPTS= \
 	CONFIG_DRIVER_WEXT=$(CONFIG_DRIVER_WEXT_SUPPORT) \
 
 ifeq ($(LOCAL_VARIANT),full)
-  CONFIG_IEEE80211W=$(CONFIG_PACKAGE_kmod-ath9k)
+  DRIVER_MAKEOPTS += CONFIG_IEEE80211W=$(CONFIG_DRIVER_11W_SUPPORT)
 endif
 
 ifneq ($(LOCAL_TYPE),hostapd)
@@ -177,7 +177,7 @@ endef
 define Package/wpad-mesh
 $(call Package/wpad/Default)
   TITLE+= (with 802.11s mesh and SAE support)
-  DEPENDS:=$(DRV_DEPENDS) +libubus +libopenssl +@CONFIG_WPA_SUPPLICANT_OPENSSL @(!TARGET_uml||BROKEN)
+  DEPENDS:=$(DRV_DEPENDS) +libubus +PACKAGE_wpad-mesh:libopenssl +@CONFIG_WPA_SUPPLICANT_OPENSSL @(!TARGET_uml||BROKEN)
   CONFLICTS:=@WPA_SUPPLICANT_INTERNAL
   VARIANT:=wpad-mesh
 endef

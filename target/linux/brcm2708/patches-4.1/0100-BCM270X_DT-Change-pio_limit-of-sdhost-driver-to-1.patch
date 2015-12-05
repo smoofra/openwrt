@@ -1,7 +1,7 @@
-From 4bf9c275c9733d1fcf41f6ee70b40e321b39eac1 Mon Sep 17 00:00:00 2001
+From 53fadd064d2efab96564df3c50a6f1a9fdf8071a Mon Sep 17 00:00:00 2001
 From: Phil Elwell <phil@raspberrypi.org>
 Date: Tue, 30 Jun 2015 17:37:38 +0100
-Subject: [PATCH 100/121] BCM270X_DT: Change pio_limit of sdhost driver to 1
+Subject: [PATCH 100/203] BCM270X_DT: Change pio_limit of sdhost driver to 1
 
 ---
  arch/arm/boot/dts/overlays/sdhost-overlay.dts | 2 +-

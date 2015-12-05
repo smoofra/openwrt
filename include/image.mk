@@ -15,6 +15,7 @@ override MAKE:=$(_SINGLE)$(SUBMAKE)
 override NO_TRACE_MAKE:=$(_SINGLE)$(NO_TRACE_MAKE)
 
 KDIR=$(KERNEL_BUILD_DIR)
+KDIR_TMP=$(KDIR)/tmp
 DTS_DIR:=$(LINUX_DIR)/arch/$(ARCH)/boot/dts/
 
 IMG_PREFIX:=openwrt-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
@@ -87,6 +88,16 @@ endef
 define toupper
 $(shell echo $(1) | tr '[:lower:]' '[:upper:]')
 endef
+
+define tolower
+$(shell echo $(1) | tr '[:upper:]' '[:lower:]')
+endef
+
+define sanitize
+$(shell echo $(call tolower,$(1)) | sed 's/_/-/g')
+endef
+
+PROFILE_SANITIZED := $(call sanitize,$(PROFILE))
 
 define split_args
 $(foreach data, \
@@ -244,7 +255,7 @@ define Image/mkfs/cpiogz
 endef
 
 define Image/mkfs/targz
-	$(TAR) -czpf $(BIN_DIR)/$(IMG_PREFIX)$(if $(PROFILE),-$(PROFILE))-rootfs.tar.gz --numeric-owner --owner=0 --group=0 -C $(TARGET_DIR)/ .
+	$(TAR) -czpf $(BIN_DIR)/$(IMG_PREFIX)$(if $(PROFILE_SANITIZED),-$(PROFILE_SANITIZED))-rootfs.tar.gz --numeric-owner --owner=0 --group=0 --sort=name -C $(TARGET_DIR)/ .
 endef
 
 E2SIZE=$(shell echo $$(($(CONFIG_TARGET_ROOTFS_PARTSIZE)*1024*1024)))
@@ -281,7 +292,7 @@ endef
 define BuildImage/mkfs
   install: mkfs-$(1)
   .PHONY: mkfs-$(1)
-  mkfs-$(1): mkfs_prepare
+  mkfs-$(1): kernel_prepare
 	$(Image/mkfs/$(1))
 	$(call Build/mkfs/default,$(1))
 	$(call Build/mkfs/$(1),$(1))
@@ -298,8 +309,56 @@ define Build/uImage
 	@mv $@.new $@
 endef
 
+define Build/netgear-chk
+	$(STAGING_DIR_HOST)/bin/mkchkimg \
+		-o $@.new \
+		-k $@ \
+		-b $(NETGEAR_BOARD_ID) \
+		-r $(NETGEAR_REGION)
+	mv $@.new $@
+endef
+
+define Build/netgear-dni
+	$(STAGING_DIR_HOST)/bin/mkdniimg \
+		-B $(NETGEAR_BOARD_ID) -v OpenWrt.$(REVISION) \
+		$(if $(NETGEAR_HW_ID),-H $(NETGEAR_HW_ID)) \
+		-r "$(1)" \
+		-i $@ -o $@.new
+	mv $@.new $@
+endef
+
+define Build/fit
+	$(TOPDIR)/scripts/mkits.sh \
+		-D $(DEVICE_NAME) -o $@.its -k $@ \
+		$(if $(word 2,$(1)),-d $(word 2,$(1))) -C $(word 1,$(1)) \
+		-a $(KERNEL_LOADADDR) -e $(if $(KERNEL_ENTRY),$(KERNEL_ENTRY),$(KERNEL_LOADADDR)) \
+		-A $(ARCH) -v $(LINUX_VERSION)
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage -f $@.its $@.new
+	@mv $@.new $@
+endef
+
 define Build/lzma
 	$(STAGING_DIR_HOST)/bin/lzma e $@ -lc1 -lp2 -pb2 $(1) $@.new
+	@mv $@.new $@
+endef
+
+define Build/gzip
+	gzip -9n -c $@ $(1) > $@.new
+	@mv $@.new $@
+endef
+
+define Build/jffs2
+	rm -rf $(KDIR_TMP)/$(DEVICE_NAME)/jffs2 && \
+		mkdir -p $(KDIR_TMP)/$(DEVICE_NAME)/jffs2/$$(dirname $(1)) && \
+		cp $@ $(KDIR_TMP)/$(DEVICE_NAME)/jffs2/$(1) && \
+		$(STAGING_DIR_HOST)/bin/mkfs.jffs2 --pad \
+			$(if $(CONFIG_BIG_ENDIAN),--big-endian,--little-endian) \
+			--squash-uids -v -e $(patsubst %k,%KiB,$(BLOCKSIZE)) \
+			-o $@.new \
+			-d $(KDIR_TMP)/$(DEVICE_NAME)/jffs2 \
+			2>&1 1>/dev/null | awk '/^.+$$$$/' && \
+		$(STAGING_DIR_HOST)/bin/padjffs2 $@.new -J $(patsubst %k,,$(BLOCKSIZE))
+	-rm -rf $(KDIR_TMP)/$(DEVICE_NAME)/jffs2/
 	@mv $@.new $@
 endef
 
@@ -318,6 +377,17 @@ endef
 
 define Build/append-rootfs
 	dd if=$(word 2,$^) $(if $(1),bs=$(1) conv=sync) >> $@
+endef
+
+define Build/append-ubi
+	sh $(TOPDIR)/scripts/ubinize-image.sh \
+		$(if $(KERNEL_IN_UBI),--kernel $(word 1,$^)) \
+		$(word 2,$^) \
+		$@.tmp \
+		-p $(BLOCKSIZE) -m $(PAGESIZE) -E 5 \
+		$(if $(SUBPAGESIZE),-s $(SUBPAGESIZE))
+	cat $@.tmp >> $@
+	rm $@.tmp
 endef
 
 define Build/pad-to
@@ -341,7 +411,7 @@ define Build/pad-offset
 endef
 
 define Build/check-size
-	@[ $$(($(subst k,* 1024,$(subst m, * 1024k,$(1))))) -gt "$$(stat -c%s $@)" ] || { \
+	@[ $$(($(subst k,* 1024,$(subst m, * 1024k,$(1))))) -ge "$$(stat -c%s $@)" ] || { \
 		echo "WARNING: Image file $@ is too big" >&2; \
 		rm -f $@; \
 	}
@@ -355,8 +425,17 @@ define Build/combined-image
 	@mv $@.new $@
 endef
 
+define Build/sysupgrade-nand
+	sh $(TOPDIR)/scripts/sysupgrade-nand.sh \
+		--board $(if $(BOARD_NAME),$(BOARD_NAME),$(DEVICE_NAME)) \
+		--kernel $(word 1,$^) \
+		--rootfs $(word 2,$^) \
+		$@
+endef
+
 define Device/Init
   PROFILES := $(PROFILE)
+  DEVICE_NAME := $(1)
   KERNEL:=
   KERNEL_INITRAMFS = $$(KERNEL)
   KERNEL_SIZE:=
@@ -369,6 +448,7 @@ define Device/Init
   KERNEL_IMAGE = $$(KERNEL_PREFIX)$$(KERNEL_SUFFIX)
   KERNEL_INITRAMFS_PREFIX = $$(IMAGE_PREFIX)-initramfs
   KERNEL_INITRAMFS_IMAGE = $$(KERNEL_INITRAMFS_PREFIX)$$(KERNEL_SUFFIX)
+  KERNEL_INITRAMFS_NAME = $$(KERNEL_NAME)-initramfs
   KERNEL_INSTALL :=
   KERNEL_NAME := vmlinux
   KERNEL_SIZE :=
@@ -381,7 +461,7 @@ define Device/ExportVar
 
 endef
 define Device/Export
-  $(foreach var,$(DEVICE_VARS) KERNEL KERNEL_INITRAMFS,$(call Device/ExportVar,$(1),$(var)))
+  $(foreach var,$(DEVICE_VARS) DEVICE_NAME KERNEL KERNEL_INITRAMFS,$(call Device/ExportVar,$(1),$(var)))
   $(1) : FILESYSTEM:=$(2)
 endef
 
@@ -395,18 +475,18 @@ define Device/Build/initramfs
   $(call Device/Export,$(KDIR)/tmp/$$(KERNEL_INITRAMFS_IMAGE),$(1))
   $$(_TARGET): $(BIN_DIR)/$$(KERNEL_INITRAMFS_IMAGE)
 
-  $(KDIR)/$$(KERNEL_NAME)-initramfs: image_prepare
+  $(KDIR)/$$(KERNEL_INITRAMFS_NAME): image_prepare
   $(BIN_DIR)/$$(KERNEL_INITRAMFS_IMAGE): $(KDIR)/tmp/$$(KERNEL_INITRAMFS_IMAGE)
 	cp $$^ $$@
 
-  $(KDIR)/tmp/$$(KERNEL_INITRAMFS_IMAGE): $(KDIR)/$$(KERNEL_NAME)-initramfs
+  $(KDIR)/tmp/$$(KERNEL_INITRAMFS_IMAGE): $(KDIR)/$$(KERNEL_INITRAMFS_NAME)
 	@rm -f $$@
 	$$(call concat_cmd,$$(KERNEL_INITRAMFS))
 endef
 endif
 
 define Device/Build/check_size
-	@[ $$(($(subst k,* 1024,$(subst m, * 1024k,$(1))))) -gt "$$(stat -c%s $@)" ] || { \
+	@[ $$(($(subst k,* 1024,$(subst m, * 1024k,$(1))))) -ge "$$(stat -c%s $@)" ] || { \
 		echo "WARNING: Image file $@ is too big" >&2; \
 		rm -f $@; \
 	}
@@ -424,6 +504,7 @@ define Device/Build/kernel
   _KERNEL_IMAGES += $(KDIR)/$$(KERNEL_NAME)
   $(KDIR)/$$(KERNEL_NAME): image_prepare
   $$(_TARGET): $$(if $$(KERNEL_INSTALL),$(BIN_DIR)/$$(KERNEL_IMAGE))
+  $(call Device/Export,$(KDIR)/$$(KERNEL_IMAGE),$(1))
   $(BIN_DIR)/$$(KERNEL_IMAGE): $(KDIR)/$$(KERNEL_IMAGE)
 	cp $$^ $$@
   ifndef IB
@@ -439,7 +520,6 @@ endef
 
 define Device/Build/image
   $$(_TARGET): $(BIN_DIR)/$(call IMAGE_NAME,$(1),$(2))
-  $(eval $(call Device/Export,$(KDIR)/$(KERNEL_IMAGE),$(1)))
   $(eval $(call Device/Export,$(KDIR)/tmp/$(call IMAGE_NAME,$(1),$(2)),$(1)))
   $(KDIR)/tmp/$(call IMAGE_NAME,$(1),$(2)): $(KDIR)/$$(KERNEL_IMAGE) $(KDIR)/root.$(1)
 	@rm -f $$@
