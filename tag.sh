@@ -1,6 +1,10 @@
 #!/bin/bash
 
-dest=$HOME/Desktop/loki-flash-$(gdate -I)
+if date --version 2>&1 | grep -q GNU ; then
+    dest=$HOME/Desktop/loki-flash-$(date -I)
+else
+    dest=$HOME/Desktop/loki-flash-$(gdate -I)
+fi
 
 set -e
 
