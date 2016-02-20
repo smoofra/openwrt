@@ -27,7 +27,7 @@ define KernelPackage/crypto-aead
 	CONFIG_CRYPTO_AEAD2
   FILES:=$(LINUX_DIR)/crypto/aead.ko
   AUTOLOAD:=$(call AutoLoad,09,aead,1)
-  $(call AddDepends/crypto, +LINUX_4_4:kmod-crypto-null)
+  $(call AddDepends/crypto, +LINUX_4_3:kmod-crypto-null +LINUX_4_4:kmod-crypto-null)
 endef
 
 $(eval $(call KernelPackage,crypto-aead))
@@ -100,39 +100,52 @@ $(eval $(call KernelPackage,crypto-wq))
 
 define KernelPackage/crypto-rng
   TITLE:=CryptoAPI random number generation
-  KCONFIG:=CONFIG_CRYPTO_RNG2
-  FILES:=$(LINUX_DIR)/crypto/rng.ko
-ifeq ($(strip $(call CompareKernelPatchVer,$(KERNEL_PATCHVER),lt,4.2.0)),1)
-  FILES+=$(LINUX_DIR)/crypto/krng.ko
-endif
-  AUTOLOAD:=$(call AutoLoad,09,rng krng)
+  DEPENDS:=+kmod-crypto-hash +kmod-crypto-hmac +kmod-crypto-sha256
+  KCONFIG:= \
+	CONFIG_CRYPTO_DRBG \
+	CONFIG_CRYPTO_DRBG_HMAC=y \
+	CONFIG_CRYPTO_DRBG_HASH=n \
+	CONFIG_CRYPTO_DRBG_MENU \
+	CONFIG_CRYPTO_JITTERENTROPY \
+	CONFIG_CRYPTO_RNG2
+  FILES:= \
+	$(LINUX_DIR)/crypto/drbg.ko@ge4.2 \
+	$(LINUX_DIR)/crypto/jitterentropy_rng.ko@ge4.2 \
+	$(LINUX_DIR)/crypto/krng.ko@lt4.2 \
+	$(LINUX_DIR)/crypto/rng.ko
+  AUTOLOAD:=$(call AutoLoad,09,drbg@ge4.2 jitterentropy_rng@ge4.2 krng@lt4.2 rng)
   $(call AddDepends/crypto)
 endef
 
 $(eval $(call KernelPackage,crypto-rng))
 
-define KernelPackage/crypto-rng-jitterentropy
-  TITLE:=Jitterentropy Non-Deterministic Random Number Generator
-  KCONFIG:=CONFIG_CRYPTO_JITTERENTROPY
-  FILES:= $(LINUX_DIR)/crypto/jitterentropy_rng.ko
-  AUTOLOAD:=$(call AutoLoad,10,jitterentropy-rng)
-  $(call AddDepends/crypto)
-endef
-
-$(eval $(call KernelPackage,crypto-rng-jitterentropy))
 
 define KernelPackage/crypto-iv
   TITLE:=CryptoAPI initialization vectors
   DEPENDS:=+kmod-crypto-manager +kmod-crypto-rng +kmod-crypto-wq
-  KCONFIG:= CONFIG_CRYPTO_BLKCIPHER2
+  KCONFIG:= CONFIG_CRYPTO_BLKCIPHER2 CONFIG_CRYPTO_ECHAINIV
   FILES:= \
 	$(LINUX_DIR)/crypto/eseqiv.ko \
-	$(LINUX_DIR)/crypto/chainiv.ko
-  AUTOLOAD:=$(call AutoLoad,10,eseqiv chainiv)
+	$(LINUX_DIR)/crypto/chainiv.ko \
+	$(LINUX_DIR)/crypto/echainiv.ko@ge4.3
+  AUTOLOAD:=$(call AutoLoad,10,eseqiv chainiv echainiv@ge4.3)
   $(call AddDepends/crypto)
 endef
 
 $(eval $(call KernelPackage,crypto-iv))
+
+
+define KernelPackage/crypto-echainiv
+  TITLE:=Encrypted Chain IV Generator
+  DEPENDS:=+kmod-crypto-aead
+  KCONFIG:=CONFIG_CRYPTO_ECHAINIV
+  FILES:=$(LINUX_DIR)/crypto/echainiv.ko
+  AUTOLOAD:=$(call AutoLoad,09,echainiv)
+  $(call AddDepends/crypto)
+endef
+
+$(eval $(call KernelPackage,crypto-echainiv))
+
 
 define KernelPackage/crypto-seqiv
   TITLE:=CryptoAPI Sequence Number IV Generator
@@ -151,7 +164,9 @@ define KernelPackage/crypto-hw-talitos
   DEPENDS:=+kmod-crypto-manager +kmod-crypto-hash +kmod-random-core +kmod-crypto-authenc
   KCONFIG:= \
 	CONFIG_CRYPTO_HW=y \
-	CONFIG_CRYPTO_DEV_TALITOS
+	CONFIG_CRYPTO_DEV_TALITOS \
+	CONFIG_CRYPTO_DEV_TALITOS1=y \
+	CONFIG_CRYPTO_DEV_TALITOS2=y
   FILES:= \
 	$(LINUX_DIR)/drivers/crypto/talitos.ko
   AUTOLOAD:=$(call AutoLoad,09,talitos)
@@ -177,6 +192,24 @@ define KernelPackage/crypto-hw-padlock
 endef
 
 $(eval $(call KernelPackage,crypto-hw-padlock))
+
+
+define KernelPackage/crypto-hw-ccp
+  TITLE:=AMD Cryptographic Coprocessor
+  DEPENDS:=+kmod-crypto-authenc +kmod-crypto-hash +kmod-crypto-manager +kmod-random-core
+  KCONFIG:= \
+	CONFIG_CRYPTO_HW=y \
+	CONFIG_CRYPTO_DEV_CCP=y \
+	CONFIG_CRYPTO_DEV_CCP_CRYPTO \
+	CONFIG_CRYPTO_DEV_CCP_DD
+  FILES:= \
+	$(LINUX_DIR)/drivers/crypto/ccp/ccp.ko \
+	$(LINUX_DIR)/drivers/crypto/ccp/ccp-crypto.ko
+  AUTOLOAD:=$(call AutoLoad,09,ccp ccp-crypto)
+  $(call AddDepends/crypto)
+endef
+
+$(eval $(call KernelPackage,crypto-hw-ccp))
 
 
 define KernelPackage/crypto-hw-geode

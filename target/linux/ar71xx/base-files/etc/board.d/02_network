@@ -4,7 +4,7 @@
 #
 
 . /lib/functions/system.sh
-. /lib/functions/uci-defaults-new.sh
+. /lib/functions/uci-defaults.sh
 . /lib/ar71xx.sh
 
 board_config_update
@@ -15,6 +15,7 @@ board=$(ar71xx_board_name)
 case "$board" in
 all0315n |\
 all0258n |\
+dr344 |\
 ja76pf2|\
 rocket-m-ti |\
 ubnt-unifi-outdoor)
@@ -22,6 +23,7 @@ ubnt-unifi-outdoor)
 	;;
 
 ap132 |\
+ap152 |\
 wlr8100)
 	ucidef_add_switch "switch0" \
 		"0@eth0" "2:lan" "3:lan" "4:lan" "5:lan" "1:wan"
@@ -33,6 +35,11 @@ epg5000)
 		"0@eth0" "1:lan:4" "2:lan:3" "3:lan:2" "4:lan:1" "5:wan"
 	;;
 
+cr5000)
+	ucidef_add_switch "switch0" \
+		"0@eth0" "1:lan" "2:lan" "3:lan" "4:lan" "5:wan"
+	;;
+
 ap136-010 |\
 ap147-010)
 	ucidef_set_interfaces_lan_wan "eth0" "eth1"
@@ -42,6 +49,7 @@ ap147-010)
 
 ap136-020 |\
 ap135-020 |\
+tew-823dru |\
 tl-wr1043nd-v2 |\
 wzr-450hp2)
 	ucidef_set_interfaces_lan_wan "eth1" "eth0"
@@ -187,7 +195,7 @@ el-m150)
 tl-wdr4300|\
 tl-wr1041n-v2)
 	ucidef_add_switch "switch0" \
-		"0@eth0" "1:lan:4" "2:lan:3" "3:lan:2" "4:lan:1" "5:wan"
+		"0@eth0" "1:wan" "2:lan:1" "3:lan:2" "4:lan:3" "5:lan:4"
 	;;
 
 tl-wr1043nd)
@@ -219,7 +227,8 @@ wnr2000-v3 |\
 wnr2000-v4 |\
 wnr2200 |\
 wnr612-v2 |\
-wnr1000-v2)
+wnr1000-v2 |\
+wpn824n)
 	ucidef_set_interfaces_lan_wan "eth1" "eth0"
 	ucidef_add_switch "switch0" \
 		"0:lan:4" "1:lan:3" "2:lan:2" "3:lan:1" "4@eth1" # XXX: confirm!
@@ -245,6 +254,12 @@ wzr-hp-g300nh)
 	ucidef_set_interfaces_lan_wan "eth0.1" "eth1"
 	ucidef_add_switch "switch0" \
 		"0:lan" "1:lan" "2:lan" "3:lan" "5@eth0"
+	;;
+
+cr3000)
+	ucidef_set_interfaces_lan_wan "eth0.1" "eth1"
+	ucidef_add_switch "switch0"  \
+		"0@eth0" "1:lan:1" "2:lan:4" "3:lan:3" "4:lan:2"
 	;;
 
 dgl-5500-a1 |\
@@ -295,23 +310,25 @@ dlan-pro-500-wp)
 
 dlan-pro-1200-ac)
 	ucidef_set_interface_lan "eth0"
-	ucidef_add_switch "switch0"
-	ucidef_add_switch_attr "switch0" "reset" "false"
-	ucidef_add_switch_ports "switch0" \
+	ucidef_add_switch "switch0" \
 		"0@eth0" "2:lan" "3:lan" "4:lan"
+	ucidef_add_switch_attr "switch0" "enable" "false"
 	;;
 
 all0305 |\
 antminer-s1 |\
 antminer-s3 |\
+antrouter-r1 |\
 aw-nr580 |\
 bullet-m |\
+c-55 |\
 cap4200ag |\
 eap300v2 |\
 eap7660d |\
 el-mini |\
 loco-m-xw |\
 mr1750 |\
+mr18 |\
 mr600 |\
 mr600v2 |\
 mr900 |\
@@ -343,13 +360,19 @@ tl-wa901nd-v2 |\
 tl-wa901nd-v3 |\
 tl-wr703n |\
 tube2h |\
+unifiac |\
 wndap360 |\
 mynet-rext |\
 wp543)
 	ucidef_set_interface_lan "eth0"
 	;;
 
-arduino-yun | \
+cap324)
+	ucidef_set_interface_lan "eth0" "dhcp"
+	;;
+
+arduino-yun |\
+tl-wa801nd-v3 |\
 dir-505-a1)
 	ucidef_set_interface_lan "eth1"
 	;;

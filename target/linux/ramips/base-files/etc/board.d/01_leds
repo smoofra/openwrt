@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /lib/functions/uci-defaults-new.sh
+. /lib/functions/uci-defaults.sh
 . /lib/ramips.sh
 
 set_usb_led() {
@@ -125,6 +125,10 @@ dir-810l|\
 mzk-dp150n)
 	ucidef_set_led_default "power" "power" "$board:green:power" "1"
 	;;
+ex2700)
+	ucidef_set_led_default "power_r" "POWER (red)" "$board:red:power" "0"
+	set_wifi_led "$board:green:router"
+	;;
 f5d8235-v1|\
 f5d8235-v2)
 	set_usb_led "$board:blue:storage"
@@ -200,9 +204,12 @@ oy-0001)
 	set_wifi_led "$board:green:wifi"
 	;;
 pbr-m1)
-	ucidef_set_led_netdev "internet" "internet" "$board:green:internet" "eth0.2"
-	ucidef_set_led_default "power" "power" "$board:green:power" "1"
-	ucidef_set_led_default "sys" "sys" "$board:green:sys" "1"
+	ucidef_set_led_netdev "internet" "internet" "$board:blue:internet" "eth0.2"
+	ucidef_set_led_default "power" "power" "$board:blue:power" "1"
+	ucidef_set_led_default "sys" "sys" "$board:blue:sys" "1"
+	;;
+psg1208)
+	set_wifi_led "$board:white:wlan2g"
 	;;
 px-4885)
 	set_wifi_led "$board:orange:wifi"
