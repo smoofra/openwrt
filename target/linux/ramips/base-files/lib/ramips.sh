@@ -88,6 +88,9 @@ ramips_board_detect() {
 	*"CF-WR800N")
 		name="cf-wr800n"
 		;;
+	*"CS-QR10")
+		name="cs-qr10"
+		;;
 	*"CY-SWR1100")
 		name="cy-swr1100"
 		;;
@@ -175,6 +178,15 @@ ramips_board_detect() {
 	*"FreeStation5")
 		name="freestation5"
 		;;
+	*"GL-MT300A")
+		name="gl-mt300a"
+		;;
+	*"GL-MT300N")
+		name="gl-mt300n"
+		;;
+	*"GL-MT750")
+		name="gl-mt750"
+		;;
 	*"HC5661")
 		name="hc5661"
 		;;
@@ -201,6 +213,15 @@ ramips_board_detect() {
 		;;
 	*"IP2202")
 		name="ip2202"
+		;;
+	*"JHR-N805R")
+		name="jhr-n805r"
+		;;
+	*"JHR-N825R")
+		name="jhr-n825r"
+		;;
+	*"JHR-N926R")
+		name="jhr-n926r"
 		;;
 	*"M3")
 		name="m3"
@@ -231,6 +252,9 @@ ramips_board_detect() {
 		;;
 	*"MiWiFi Mini")
 		name="miwifi-mini"
+		;;
+	*"MiWiFi Nano")
+		name="miwifi-nano"
 		;;
 	*"MLW221")
 		name="mlw221"
@@ -271,8 +295,17 @@ ramips_board_detect() {
 	*"MZK-DP150N")
 		name="mzk-dp150n"
 		;;
+	*"MZK-EX300NP")
+		name="mzk-ex300np"
+		;;
+	*"MZK-EX750NP")
+		name="mzk-ex750np"
+		;;
 	*"MZK-W300NH2"*)
 		name="mzk-w300nh2"
+		;;
+	*"MZK-WDPR"*)
+		name="mzk-wdpr"
 		;;
 	*"NA930")
 		name="na930"
@@ -430,11 +463,17 @@ ramips_board_detect() {
 	*"WNCE2001")
 		name="wnce2001"
 		;;
+	*"WNDR3700v5")
+		name="wndr3700v5"
+		;;
 	*"WR512-3GN-like"*)
 		name="wr512-3gn"
 		;;
 	*"WR6202")
 		name="wr6202"
+		;;
+	*"WRH-300CR")
+		name="wrh-300cr"
 		;;
 	*"WRTNODE")
 		name="wrtnode"
@@ -475,8 +514,14 @@ ramips_board_detect() {
 	*"ZBT-WA05")
 		name="zbt-wa05"
 		;;
+	*"ZBT-WE826")
+		name="zbt-we826"
+		;;
 	*"ZBT-WG2626")
 		name="zbt-wg2626"
+		;;
+	*"ZBT-WG3526")
+		name="zbt-wg3526"
 		;;
 	*"ZBT-WR8305RT")
 		name="zbt-wr8305rt"

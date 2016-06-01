@@ -8,13 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=u-boot
-PKG_VERSION:=2016.01
+PKG_VERSION:=2016.03
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:= \
 	http://mirror2.openwrt.org/sources \
 	ftp://ftp.denx.de/pub/u-boot
 
-PKG_MD5SUM:=7d4f65fd43d4d706f5c5650e020d899d
+PKG_MD5SUM:=973c1d896be751321cc3aafa564f64b2
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -37,8 +37,18 @@ define uboot/zc706
 	TITLE:=U-Boot $(PKG_VERSION) for Xilinx ZC706 Dev Board
 endef
 
+define uboot/zed
+	TITLE:=U-Boot $(PKG_VERSION) for Avnet Digilent ZedBoard Dev Board
+endef
+
+define uboot/zybo
+	TITLE:=U-Boot $(PKG_VERSION) for Digilent Zybo Dev Board
+endef
+
 UBOOTS := \
 	zc702 \
+	zed \
+	zybo \
 
 define Package/uboot/template
 define Package/uboot-zynq-$(1)

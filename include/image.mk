@@ -336,7 +336,11 @@ define Build/fit
 endef
 
 define Build/lzma
-	$(STAGING_DIR_HOST)/bin/lzma e $@ -lc1 -lp2 -pb2 $(1) $@.new
+	$(call Build/lzma-no-dict,-lc1 -lp2 -pb2 $(1))
+endef
+
+define Build/lzma-no-dict
+	$(STAGING_DIR_HOST)/bin/lzma e $@ $(1) $@.new
 	@mv $@.new $@
 endef
 
@@ -379,6 +383,7 @@ endef
 
 define Build/append-ubi
 	sh $(TOPDIR)/scripts/ubinize-image.sh \
+		$(if $(UBOOTENV_IN_UBI),--uboot-env) \
 		$(if $(KERNEL_IN_UBI),--kernel $(word 1,$^)) \
 		$(word 2,$^) \
 		$@.tmp \
