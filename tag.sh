@@ -8,6 +8,13 @@ fi
 
 set -e
 
+n=1
+destbase=$dest
+while [ -e "$dest" ]; do
+    dest="$destbase.$n"
+    n=$(($n + 1))
+done
+
 if [ -e "$dest" ]; then
     echo $dest exists
     exit 1
